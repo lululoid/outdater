@@ -1,4 +1,6 @@
+# shellcheck disable=SC2034,SC2086
 SKIPUNZIP=1
+CONF=/data/adb/peulist.txt
 case "${ARCH}" in
     "arm64")
         SQLITE_BIN_DIR="$TMPDIR/arm/arm64-v8a"
@@ -22,3 +24,5 @@ cp -af "$TMPDIR/module.prop" "$TMPDIR/service.sh" "$MODPATH/" || abort "Failed c
 cp -af "$SQLITE_BIN_DIR/sqlite3" "$MODPATH/" || abort "Failed copy binary for $ARCH."
 set_perm "${MODPATH}/service.sh" 0 0 0755
 set_perm "${MODPATH}/sqlite3" 0 0 0755
+ui_print "config path is $CONF"
+touch /data/adb/peulist.txt

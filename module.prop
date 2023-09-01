@@ -1,6 +1,6 @@
-id=playstore-excl-upd
-name=PlayStore Update Excluding Tool
+id=outdater
+name=Outdater
 version=v3.0
-versionCode=30
+versionCode=33
 author=yuk7
 description=Remove apps don't want to update from the update list of PlayStore

@@ -1,0 +1,16 @@
+#!/system/bin/sh
+# shellcheck disable=SC2086,SC3010,SC2034,SC3043,SC2046
+NVBASE=/data/adb
+MODDIR=$NVBASE/modules/outdater
+LOC=$NVBASE/modules_update/outdater
+
+[ -d $LOC ] && {
+	# shellcheck disable=SC1091
+	. $LOC/modules.sh
+} ||
+	[ -z $LOC ] && {
+	# shellcheck disable=SC1091
+	. $MODDIR/modules.sh
+}
+
+outdater

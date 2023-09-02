@@ -2,7 +2,7 @@
 SKIPUNZIP=1
 CONF=/data/adb/peulist.txt
 
-case "${ARCH}" in
+case $ARCH in
 "arm64")
 	SQLITE_BIN_DIR="$TMPDIR/arm/arm64-v8a"
 	;;
@@ -21,16 +21,17 @@ case "${ARCH}" in
 esac
 
 unzip -o "$ZIPFILE" -d $TMPDIR >&2
-cp -af "$TMPDIR/module.prop" "$TMPDIR/service.sh" $TMPDIR/modules.sh "$MODPATH/" || abort "Failed copy module files."
+cp -raf "$TMPDIR/module.prop" "$TMPDIR/service.sh" $TMPDIR/modules.sh $TMPDIR/system "$MODPATH/" || abort "Failed copy module files."
 cp -af "$SQLITE_BIN_DIR/sqlite3" "$MODPATH/" || abort "Failed copy binary for $ARCH."
-set_perm "${MODPATH}/service.sh" 0 0 0755
-set_perm "${MODPATH}/sqlite3" 0 0 0755
-set_perm "${MODPATH}/modules.sh" 0 0 0755
-
-. $MODPATH/modules.sh
+set_perm $MODPATH/service.sh 0 0 0755
+set_perm $MODPATH/sqlite3 0 0 0755
+set_perm $MODPATH/modules.sh 0 0 0755
+set_perm $MODPATH/system/bin/outdater 0 0 0755
 
 ui_print "> config path is $CONF"
 touch /data/adb/peulist.txt
-ui_print "> starting service"
 kill -9 $(resetprop outdater.pid)
-outdater && ui_print "  service started"
+resetprop --delete outdater.pid
+cd $MODPATH || ui_print "$MODPATH is unavailable"
+./system/bin/outdater &&
+	ui_print "> service is started"

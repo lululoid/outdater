@@ -30,16 +30,16 @@ if [ -z "$versionCode" ]; then
 fi
 
 # U think I lazy to type? No, i just really forgetful sometimes
-sed -i "s/\(version=v\)[0-9.]*\(-beta\)/\1$version\2/g; s/\(versionCode=\)[0-9]*/\1$versionCode/g" module.prop
+sed -i "s/\(version=v\)[0-9.]*/\1$version/g; s/\(versionCode=\)[0-9]*/\1$versionCode/g" module.prop
 
 changelog_file=$(find . -type f -iname "*changelog.md")
 module_name=$(sed -n 's/id=\(.*\)/\1/p' module.prop)
 mv -f "$changelog_file" "$module_name-v${version}_$versionCode-beta-changelog.md" 2>/dev/null || echo "Changelog not found"
 
-7za a "packages/$module_name-v${version}_$versionCode-beta.zip" . \
+7za a "packages/$module_name-v${version}_$versionCode.zip" . \
 	-x!*changelog.md \
 	-x!wrapit.sh \
 	-x!README.md \
 	-x!packages \
 	-x!.git \
-  -x!test
+	-x!test

@@ -1,53 +1,7 @@
 #!/system/bin/sh
-# shellcheck disable=SC2086
-PKG_LIST_FILE=/data/adb/peulist.txt
-PS_PKG_NAME=com.android.vending
-PS_DATA_DIR=/data/data/${PS_PKG_NAME}
-INTERVAL=60
-
+# shellcheck disable=SC2086,SC3010
 MODDIR=${0%/*}
+# shellcheck disable=SC1091
+. $MODDIR/modules.sh
 cd $MODDIR || log -t Magisk "$MODDIR doesn't exist"
-LF="
-"
-
-PKG_LIST=$(cat "${PKG_LIST_FILE}")
-
-while true; do
-	EXEC_REMOVE=0
-	DETECTED_PKGS=
-
-	# shellcheck disable=SC2162
-	while read PKGNAME; do
-		[ -n "$PKGNAME" ] && {
-			SELECT_PKG=$(./sqlite3 "$PS_DATA_DIR/databases/library.db" "SELECT doc_id FROM ownership WHERE doc_id='${PKGNAME}'")
-			if [ -n "${SELECT_PKG}" ]; then
-				EXEC_REMOVE=1
-				DETECTED_PKGS=${DETECTED_PKGS}${LF}${SELECT_PKG}
-			fi
-		}
-	done <<END
-    $PKG_LIST
-END
-
-	[ ${EXEC_REMOVE} -eq 1 ] && {
-		# shellcheck disable=SC2162
-		while read PKGNAME; do
-			if [ -n "$PKGNAME" ]; then
-				./sqlite3 "$PS_DATA_DIR/databases/auto_update.db" "DELETE FROM auto_update WHERE pk='${PKGNAME}'"
-				./sqlite3 "$PS_DATA_DIR/databases/library.db" "DELETE FROM ownership WHERE doc_id='${PKGNAME}'"
-				./sqlite3 "$PS_DATA_DIR/databases/localappstate.db" "DELETE FROM appstate WHERE package_name='${PKGNAME}'"
-			fi
-		done <<END
-    $DETECTED_PKGS
-END
-		am force-stop ${PS_PKG_NAME}
-	}
-
-	grep -q -e "<boolean name=\"auto_update_enabled\" value=\"true\" />" -e "<boolean name=\"update_over_wifi_only\" value=\"true\" />" "$PS_DATA_DIR/shared_prefs/finsky.xml" && {
-		sed -i -e 's#<boolean name="auto_update_enabled" value="true" />#<boolean name="auto_update_enabled" value="false" />#g' "$PS_DATA_DIR/shared_prefs/finsky.xml"
-		sed -i -e 's#<boolean name="update_over_wifi_only" value="true" />#<boolean name="update_over_wifi_only" value="false" />#g' "$PS_DATA_DIR/shared_prefs/finsky.xml"
-		am force-stop ${PS_PKG_NAME}
-	}
-
-	sleep $INTERVAL
-done
+outdater

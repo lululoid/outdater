@@ -1,5 +1,6 @@
 # shellcheck disable=SC2034,SC2086,SC2046
 SKIPUNZIP=1
+export SKIPUNZIP
 CONF=/data/adb/peulist.txt
 
 case $ARCH in
@@ -33,5 +34,4 @@ touch /data/adb/peulist.txt
 kill -9 $(resetprop outdater.pid)
 resetprop --delete outdater.pid
 cd $MODPATH || ui_print "$MODPATH is unavailable"
-./system/bin/outdater &&
-	ui_print "> service is started"
+./system/bin/outdater

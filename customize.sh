@@ -29,7 +29,8 @@ set_perm $MODPATH/sqlite3 0 0 0755
 set_perm $MODPATH/modules.sh 0 0 0755
 set_perm $MODPATH/system/bin/outdater 0 0 0755
 
-ui_print "> config path is $CONF"
+ui_print "> Config path is $CONF"
+ui_print "> Enjoy no need to reboot"
 touch /data/adb/peulist.txt
 kill -9 $(resetprop outdater.pid)
 resetprop --delete outdater.pid

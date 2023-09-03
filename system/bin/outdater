@@ -4,14 +4,14 @@ NVBASE=/data/adb
 MODDIR=$NVBASE/modules/outdater
 LOC=$NVBASE/modules_update/outdater
 
-[ -d $LOC ] && {
-	{
+{
+	[ -d $LOC ] && {
 		# shellcheck disable=SC1091
 		. $LOC/modules.sh
-	} || {
-		# shellcheck disable=SC1091
-		. $MODDIR/modules.sh
 	}
+} || {
+	# shellcheck disable=SC1091
+	. $MODDIR/modules.sh
 }
 
 outdater

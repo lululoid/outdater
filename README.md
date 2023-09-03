@@ -7,7 +7,7 @@ A Magisk module for excludes apps from update lists of the Play Store
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 ![License](https://img.shields.io/github/license/yuk7/playstore-excl-upd.svg?style=flat-square)
 
-### [Download](https://github.com/yuk7/playstore-excl-upd/releases/latest) 
+### [Download](https://github.com/lululoid/outdater/releases) 
 
 ## Requirements
 * Android 4.2+

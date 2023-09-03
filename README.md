@@ -15,21 +15,18 @@ A Magisk module for excludes apps from update lists of the Play Store
 * Magisk v20.4+
 
 ## How to Use
-#### 0. If possible, disable the auto-update of Play Store.
-v2.0 or higher forces automatic updates to be disabled.
 
 #### 1. Install [zip](https://github.com/yuk7/playstore-excl-upd/releases/latest) from Magisk Manager.
 
-#### 2. Make a list of apps to exclude.
-Create a list of apps to exclude to `/data/cache/peulist.txt`.
+#### 2. List of apps to exclude.
+Edit a list of apps to exclude to `/data/adb/peulist.txt`.
 The list is separated by line breaks.
 
-e.g. `/data/cache/peulist.txt`:
+e.g. `/data/adb/peulist.txt`:
 ```
 com.github.android
 com.google.android.gm
 com.android.chrome
 ```
 
-#### 3. Reboot the phone
-The list is loaded when the service starts, so a reboot is required for the changes to take effect.
+#### 3. Enjoy, no need of reboot the phone

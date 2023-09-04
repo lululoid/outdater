@@ -22,11 +22,11 @@ case $ARCH in
 esac
 
 unzip -o "$ZIPFILE" -d $TMPDIR >&2
-cp -raf "$TMPDIR/module.prop" "$TMPDIR/service.sh" $TMPDIR/modules.sh $TMPDIR/system "$MODPATH/" || abort "Failed copy module files."
+cp -raf "$TMPDIR/module.prop" "$TMPDIR/service.sh" $TMPDIR/outdater.sh $TMPDIR/system "$MODPATH/" || abort "Failed copy module files."
 cp -af "$SQLITE_BIN_DIR/sqlite3" "$MODPATH/" || abort "Failed copy binary for $ARCH."
 set_perm $MODPATH/service.sh 0 0 0755
 set_perm $MODPATH/sqlite3 0 0 0755
-set_perm $MODPATH/modules.sh 0 0 0755
+set_perm $MODPATH/outdater.sh 0 0 0755
 set_perm $MODPATH/system/bin/outdater 0 0 0755
 
 ui_print "> Config path is $CONF"

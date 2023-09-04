@@ -7,11 +7,11 @@ LOC=$NVBASE/modules_update/outdater
 {
 	[ -d $LOC ] && {
 		# shellcheck disable=SC1091
-		. $LOC/modules.sh
+		. $LOC/outdater.sh
 	}
 } || {
 	# shellcheck disable=SC1091
-	. $MODDIR/modules.sh
+	. $MODDIR/outdater.sh
 }
 
 outdater

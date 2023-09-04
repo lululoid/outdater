@@ -20,7 +20,6 @@ outdater() {
 	local PS_PKG_NAME=com.android.vending
 	local PS_DATA_DIR=/data/data/$PS_PKG_NAME
 	local PKG_LIST
-	PKG_LIST=$(cat "$PKG_LIST_FILE")
 	local LF="
 "
 	local last_modified
@@ -32,6 +31,7 @@ outdater() {
 
 		[[ "$last_modified" != "$last_modified0" ]] ||
 			[ $SKIPUNZIP -eq 1 ] && {
+			PKG_LIST=$(cat "$PKG_LIST_FILE")
 			# shellcheck disable=SC2162
 			while read PKGNAME; do
 				[ -n "$PKGNAME" ] && {
@@ -61,8 +61,15 @@ END
 				done <<END
 $DETECTED_PKGS
 END
+				is_opening_ps=$(dumpsys activity |
+					$BIN/fgrep -w ResumedActivity |
+					sed -n 's/.*u[0-9]\{1,\} \(.*\)\/.*/  \1/p' |
+					tail -n 1 | sed 's/ //g' |
+					$BIN/fgrep $PS_PKG_NAME)
 				am force-stop $PS_PKG_NAME
-				am start -n com.android.vending/com.google.android.finsky.activities.MainActivity
+
+				[ -n "$is_opening_ps" ] &&
+					am start -n com.android.vending/com.google.android.finsky.activities.MainActivity
 			}
 		}
 		last_modified=$(stat $PS_DATA_DIR/databases/library.db | grep "^Modify*")

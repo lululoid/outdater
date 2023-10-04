@@ -23,14 +23,27 @@ outdater() {
 	local LF="
 "
 	local last_modified
-	last_modified=$(stat $PS_DATA_DIR/databases/library.db | grep "^Modify*")
+	local last_modified0
+	last_modified=$(stat $PS_DATA_DIR/databases/library.db | $BIN/fgrep Modify)
 	local fg_app
+	local PKG_LIST_MODIFIED
+	local PKG_LIST_MODIFIED0
+	PKG_LIST_MODIFIED=$(stat $PKG_LIST_FILE | $BIN/fgrep Modify)
 
 	while true; do
-		last_modified0=$(stat $PS_DATA_DIR/databases/library.db | grep "^Modify*")
+		last_modified0=$(
+			stat $PS_DATA_DIR/databases/library.db |
+				$BIN/fgrep Modify
+		)
+		PKG_LIST_MODIFIED0=$(
+			stat $PKG_LIST_FILE | $BIN/fgrep Modify
+		)
 
 		[[ "$last_modified" != "$last_modified0" ]] ||
-			[ $SKIPUNZIP -eq 1 ] && {
+			{
+				[ $SKIPUNZIP -eq 1 ] ||
+					[[ "$PKG_LIST_MODIFIED" != "$PKG_LIST_MODIFIED0" ]]
+			} && {
 			PKG_LIST=$(cat "$PKG_LIST_FILE")
 			# shellcheck disable=SC2162
 			while read PKGNAME; do
@@ -52,9 +65,13 @@ END
 				# shellcheck disable=SC2162
 				while read PKGNAME; do
 					if [ -n "$PKGNAME" ]; then
-						./sqlite3 "$PS_DATA_DIR/databases/library.db" "DELETE FROM auto_update WHERE pk='$PKGNAME'"
-						./sqlite3 "$PS_DATA_DIR/databases/library.db" "DELETE FROM ownership WHERE doc_id='$PKGNAME'"
-						./sqlite3 "$PS_DATA_DIR/databases/localappstate.db" "DELETE FROM appstate WHERE package_name='$PKGNAME'"
+						./sqlite3 "$PS_DATA_DIR/databases/library.db" \
+							"DELETE FROM auto_update WHERE pk='$PKGNAME'"
+						./sqlite3 "$PS_DATA_DIR/databases/library.db" \
+							"DELETE FROM ownership WHERE doc_id='$PKGNAME'"
+						./sqlite3 \
+							"$PS_DATA_DIR/databases/localappstate.db" \
+							"DELETE FROM appstate WHERE package_name='$PKGNAME'"
 						loger "$PKGNAME excluded"
 						EXEC_REMOVE=0
 					fi
@@ -69,14 +86,22 @@ END
 				am force-stop $PS_PKG_NAME
 
 				[ -n "$is_opening_ps" ] &&
-					am start -n com.android.vending/com.google.android.finsky.activities.MainActivity
+					am start -n \
+						com.android.vending/com.google.android.finsky.activities.MainActivity
 			}
 		}
-		last_modified=$(stat $PS_DATA_DIR/databases/library.db | grep "^Modify*")
+
+		last_modified=$(
+			stat $PS_DATA_DIR/databases/library.db | grep "^Modify*"
+		)
 		last_modified0=$last_modified
+		PKG_LIST_MODIFIED=$(
+			stat $PKG_LIST_FILE | $BIN/fgrep Modify
+		)
+		PKG_LIST_MODIFIED0=$PKG_LIST_MODIFIED
 		sleep 1
 	done &
 
-	loger "service started"
 	resetprop outdater.pid $!
+	loger "service started"
 }

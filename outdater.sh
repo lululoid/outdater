@@ -13,6 +13,30 @@ loger() {
 	}
 }
 
+chk_lm() {
+	local file=$1
+	stat -c %y "$file"
+}
+
+settings_changed() {
+	local last_modified
+	local last_modified0
+	local PKG_LIST_MODIFIED
+	local PKG_LIST_MODIFIED0
+	last_modified=$(chk_lm $PS_DATA_DIR/databases/library.db)
+	last_modified0=$(chk_lm $PS_DATA_DIR/databases/library.db)
+
+	[[ "$last_modified" != "$last_modified0" ]] ||
+		{
+			[ $SKIPUNZIP -eq 1 ] || {
+				PKG_LIST_MODIFIED=$(chk_lm $PKG_LIST_FILE)
+				PKG_LIST_MODIFIED0=$(chk_lm $PKG_LIST_FILE)
+
+				[[ "$PKG_LIST_MODIFIED" != "$PKG_LIST_MODIFIED0" ]]
+			}
+		}
+}
+
 outdater() {
 	local EXEC_REMOVE=0
 	local DETECTED_PKGS=
@@ -22,28 +46,10 @@ outdater() {
 	local PKG_LIST
 	local LF="
 "
-	local last_modified
-	local last_modified0
-	last_modified=$(stat $PS_DATA_DIR/databases/library.db | $BIN/fgrep Modify)
-	local fg_app
-	local PKG_LIST_MODIFIED
-	local PKG_LIST_MODIFIED0
-	PKG_LIST_MODIFIED=$(stat $PKG_LIST_FILE | $BIN/fgrep Modify)
+	local is_opening_ps
 
 	while true; do
-		last_modified0=$(
-			stat $PS_DATA_DIR/databases/library.db |
-				$BIN/fgrep Modify
-		)
-		PKG_LIST_MODIFIED0=$(
-			stat $PKG_LIST_FILE | $BIN/fgrep Modify
-		)
-
-		[[ "$last_modified" != "$last_modified0" ]] ||
-			{
-				[ $SKIPUNZIP -eq 1 ] ||
-					[[ "$PKG_LIST_MODIFIED" != "$PKG_LIST_MODIFIED0" ]]
-			} && {
+		settings_changed && {
 			PKG_LIST=$(cat "$PKG_LIST_FILE")
 			# shellcheck disable=SC2162
 			while read PKGNAME; do
@@ -78,28 +84,19 @@ END
 				done <<END
 $DETECTED_PKGS
 END
-				is_opening_ps=$(dumpsys activity |
-					$BIN/fgrep -w ResumedActivity |
-					sed -n 's/.*u[0-9]\{1,\} \(.*\)\/.*/  \1/p' |
-					tail -n 1 | sed 's/ //g' |
-					$BIN/fgrep $PS_PKG_NAME)
+				is_opening_ps=$(
+					dumpsys activity activities | ./sed -n \
+						'/\bResumedActivity\b/s/.*u0 \(.*\)\/.*/\1/p' |
+						$BIN/fgrep $PS_PKG_NAME
+				)
 				am force-stop $PS_PKG_NAME
 
 				[ -n "$is_opening_ps" ] &&
 					am start -n \
-						com.android.vending/com.google.android.finsky.activities.MainActivity
+						$PS_PKG_NAME/com.google.android.finsky.activities.MainActivity
 			}
 		}
-
-		last_modified=$(
-			stat $PS_DATA_DIR/databases/library.db | grep "^Modify*"
-		)
-		last_modified0=$last_modified
-		PKG_LIST_MODIFIED=$(
-			stat $PKG_LIST_FILE | $BIN/fgrep Modify
-		)
-		PKG_LIST_MODIFIED0=$PKG_LIST_MODIFIED
-		sleep 1
+		sleep 8
 	done &
 
 	resetprop outdater.pid $!
